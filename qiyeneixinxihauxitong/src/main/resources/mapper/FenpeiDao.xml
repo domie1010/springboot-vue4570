@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.FenpeiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.renwu_id as renwuId
+        ,a.yonghu_id as yonghuId
+        ,a.fenpei_time as fenpeiTime
+        ,a.fenpei_types as fenpeiTypes
+        ,a.fenpei_content as fenpeiContent
+        ,a.fenpei_delete as fenpeiDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.FenpeiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,renwu.jingli_id as renwuJingliId
+        ,renwu.renwu_name as renwuName
+        ,renwu.renwu_uuid_number as renwuUuidNumber
+        ,renwu.renwu_photo as renwuPhoto
+        ,renwu.renwu_types as renwuTypes
+        ,renwu.renwu_file as renwuFile
+        ,renwu.renwu_content as renwuContent
+        ,renwu.renwu_delete as renwuDelete
+        ,yonghu.yonghu_uuid_number as yonghuUuidNumber
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM fenpei  a
+        left JOIN renwu renwu ON a.renwu_id = renwu.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.renwuId != null and params.renwuId != ''">
+                and (
+                    a.renwu_id = #{params.renwuId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.fenpeiTimeStart != '' and params.fenpeiTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.fenpei_time) >= UNIX_TIMESTAMP(#{params.fenpeiTimeStart}) ]]>
+            </if>
+            <if test=" params.fenpeiTimeEnd != '' and params.fenpeiTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.fenpei_time) <= UNIX_TIMESTAMP(#{params.fenpeiTimeEnd}) ]]>
+            </if>
+            <if test="params.fenpeiTime != null and params.fenpeiTime != ''">
+                and a.fenpei_time = #{params.fenpeiTime}
+            </if>
+            <if test="params.fenpeiTypes != null and params.fenpeiTypes != ''">
+                and a.fenpei_types = #{params.fenpeiTypes}
+            </if>
+            <if test=" params.fenpeiContent != '' and params.fenpeiContent != null and params.fenpeiContent != 'null' ">
+                and a.fenpei_content like CONCAT('%',#{params.fenpeiContent},'%')
+            </if>
+            <if test="params.fenpeiDeleteStart != null and params.fenpeiDeleteStart != ''">
+                <![CDATA[  and a.fenpei_delete >= #{params.fenpeiDeleteStart}   ]]>
+            </if>
+            <if test="params.fenpeiDeleteEnd != null and params.fenpeiDeleteEnd != ''">
+                <![CDATA[  and a.fenpei_delete <= #{params.fenpeiDeleteEnd}   ]]>
+            </if>
+             <if test="params.fenpeiDelete != null and params.fenpeiDelete != ''">
+                and a.fenpei_delete = #{params.fenpeiDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+
+                <!-- 判断任务的id不为空 -->
+            <if test=" params.renwuIdNotNull != '' and params.renwuIdNotNull != null and params.renwuIdNotNull != 'null' ">
+                and a.renwu_id IS NOT NULL
+            </if>
+            <if test="params.jingliId != null  and params.jingliId != ''">
+                and renwu.jingli_id = #{params.jingliId}
+            </if>
+            <if test=" params.renwuName != '' and params.renwuName != null and params.renwuName != 'null' ">
+                and renwu.renwu_name like CONCAT('%',#{params.renwuName},'%')
+            </if>
+            <if test=" params.renwuUuidNumber != '' and params.renwuUuidNumber != null and params.renwuUuidNumber != 'null' ">
+                and renwu.renwu_uuid_number like CONCAT('%',#{params.renwuUuidNumber},'%')
+            </if>
+            <if test="params.renwuTypes != null  and params.renwuTypes != ''">
+                and renwu.renwu_types = #{params.renwuTypes}
+            </if>
+
+            <if test=" params.renwuContent != '' and params.renwuContent != null and params.renwuContent != 'null' ">
+                and renwu.renwu_content like CONCAT('%',#{params.renwuContent},'%')
+            </if>
+            <if test="params.renwuDeleteStart != null  and params.renwuDeleteStart != '' ">
+                <![CDATA[  and renwu.renwu_delete >= #{params.renwuDeleteStart}   ]]>
+            </if>
+            <if test="params.renwuDeleteEnd != null  and params.renwuDeleteEnd != '' ">
+                <![CDATA[  and renwu.renwu_delete <= #{params.renwuDeleteEnd}   ]]>
+            </if>
+            <if test="params.renwuDelete != null  and params.renwuDelete != '' ">
+                and renwu.renwu_delete = #{params.renwuDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(renwu.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(renwu.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuUuidNumber != '' and params.yonghuUuidNumber != null and params.yonghuUuidNumber != 'null' ">
+                and yonghu.yonghu_uuid_number like CONCAT('%',#{params.yonghuUuidNumber},'%')
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
